@@ -3,6 +3,7 @@ import scipy.stats as stats
 import numpy as np
 from functools import cached_property
 import matplotlib.pyplot as plt
+from enum import Enum, auto
 
 
 def batched(iterable, n):
@@ -29,16 +30,25 @@ def bits2a(b):
     return "".join(chr(int("".join(x), 2)) for x in zip(*[iter(b)] * 8))
 
 
+class TransferFunctions(Enum):
+    DiracDelta = auto()
+    Sinc = auto()
+    Cosine = auto()
+    Sine = auto()
+    Triangle = auto()
+
+
 class PCARunner:
     F_SAMPLE = 1e6  # Hz
     SAMPLES_PER_SYMBOL = 200
     BITS_PER_SYMBOL = 2
     F_C = 50e3  # Hz
 
-    def __init__(self, variance, message_txt):
+    def __init__(self, variance, message_txt, transfer_func):
         self.message_txt = message_txt
         self.variance = variance
         self.noiseRV = stats.norm(loc=0.0, scale=np.sqrt(variance))
+        self.transfer_func = transfer_func
 
     @cached_property
     def dt(self):
@@ -102,7 +112,21 @@ class PCARunner:
 
     @cached_property
     def y(self):
-        return self.x_modulated + self.noiseRV.rvs(len(self.x))
+        h_of_t = None
+        if self.transfer_func == TransferFunctions.DiracDelta:
+            h_of_t = np.ones(np.shape(self.t)[0])
+        elif self.transfer_func == TransferFunctions.Sinc:
+            h_of_t = np.sinc(self.t)
+        elif self.transfer_func == TransferFunctions.Sine:
+            h_of_t = np.sin(self.t)
+        elif self.transfer_func == TransferFunctions.Cosine:
+            h_of_t = np.cos(self.t)
+        elif self.transfer_func == TransferFunctions.Triangle:
+            l = np.shape(self.t)[0]
+            h_of_t = np.zeros(l)
+            h_of_t[: l // 2] = np.linspace(0, 1, l // 2)
+            h_of_t[l // 2 :] = np.linspace(1, 0, l // 2)
+        return self.x_modulated * h_of_t + self.noiseRV.rvs(len(self.x))
 
     @cached_property
     def principal_eig_vec(self):
@@ -192,7 +216,11 @@ def run_sweep():
     bers = []
 
     for var in (vars := np.geomspace(1e-5, 1e2, 8)):
-        pca = PCARunner(variance=var, message_txt="Hello, world.")
+        pca = PCARunner(
+            variance=var,
+            message_txt="Hello, world.",
+            transfer_func=TransferFunctions.Triangle,
+        )
         snrs.append(pca.snr)
         bers.append(pca.ber)
 
@@ -210,9 +238,13 @@ def run_sweep():
 
 
 def main():
-    pca = PCARunner(variance=1e-3, message_txt="Hello, world.")
+    pca = PCARunner(
+        variance=1e-3,
+        message_txt="Hello, world.",
+        transfer_func=TransferFunctions.Triangle,
+    )
     pca.display_error_metrics()
 
 
 if __name__ == "__main__":
-    run_sweep()
+    main()
