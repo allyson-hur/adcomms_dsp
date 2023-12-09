@@ -3,7 +3,8 @@ import scipy.stats as stats
 import numpy as np
 from functools import cached_property
 import matplotlib.pyplot as plt
-from enum import Enum, auto
+from enum import Enum
+from pathlib import Path
 
 
 def batched(iterable, n):
@@ -31,11 +32,11 @@ def bits2a(b):
 
 
 class TransferFunctions(Enum):
-    DiracDelta = auto()
-    Sinc = auto()
-    Cosine = auto()
-    Sine = auto()
-    Triangle = auto()
+    DiracDelta = "dirac_delta"
+    Sinc = "sinc"
+    Cosine = "cosine"
+    Sine = "sine"
+    Triangle = "triangle"
 
 
 class PCARunner:
@@ -212,29 +213,31 @@ class PCARunner:
 
 
 def run_sweep():
-    snrs = []
-    bers = []
+    for tf in TransferFunctions.__members__.values():
+        snrs = []
+        bers = []
 
-    for var in (vars := np.geomspace(1e-5, 1e2, 8)):
-        pca = PCARunner(
-            variance=var,
-            message_txt="Hello, world.",
-            transfer_func=TransferFunctions.Triangle,
-        )
-        snrs.append(pca.snr)
-        bers.append(pca.ber)
+        for var in (vars := np.geomspace(1e-5, 1e2, 8)):
+            pca = PCARunner(
+                variance=var,
+                message_txt="Hello, world.",
+                transfer_func=tf,
+            )
+            snrs.append(pca.snr)
+            bers.append(pca.ber)
 
-    _, ax = plt.subplots(2, 1)
+        _, ax = plt.subplots(2, 1)
 
-    ax[0].plot(vars, snrs)
-    ax[0].set_xscale("log")
-    ax[0].set_yscale("log")
-    ax[0].set(xlabel="Variance", ylabel="Signal-to-Noise Ratio")
-    ax[1].plot(vars, bers)
-    ax[1].set_xscale("log")
-    ax[1].set(xlabel="Variance", ylabel="Bit Error Rate")
+        ax[0].plot(vars, snrs)
+        ax[0].set_xscale("log")
+        ax[0].set_yscale("log")
+        ax[0].set(xlabel="Variance", ylabel="Signal-to-Noise Ratio")
+        ax[1].plot(vars, bers)
+        ax[1].set_xscale("log")
+        ax[1].set(xlabel="Variance", ylabel="Bit Error Rate")
+        plt.suptitle(f"h(t): {tf.name}")
 
-    plt.show()
+        plt.savefig(Path(__file__).parent / f"images/{tf.value}")
 
 
 def main():
@@ -247,4 +250,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    run_sweep()
