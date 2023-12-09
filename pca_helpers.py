@@ -33,7 +33,6 @@ def generate_signal(message_txt: str):
 
     return message_bits, message_bits_txt
 
-
 message_txt = "Hello, world."
 message_bits, message_bits_txt = generate_signal(message_txt)
 
