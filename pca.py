@@ -30,23 +30,6 @@ def PAMGenerator(symbol, k=2, samples_per_symbol=10):
 def bits2a(b):
     return "".join(chr(int("".join(x), 2)) for x in zip(*[iter(b)] * 8))
 
-# Plotting function
-def real_fft_plot(t, x, t_axis, f_axis, t_label='$x(t)$', f_label='$X(f)$', ylim=1.25, xlim=100e3, abs_xlim=100.0):
-	"""Plots the Fast Fourier Transform in the frequency domain. Stores only one half of the FFT (F{real} is always symmetric)."""
-	X = fftshift(fft(x))
-	f = fftshift(fftfreq(len(X), dt))
-	t_axis.plot(t, x, label=t_label)
-	t_axis.set_ylim(-ylim, ylim)
-	t_axis.set_title(t_label)
-	t_axis.set_xlabel('$t$')
-
-	f_axis.plot(f[len(X)//2:], np.abs(X[len(X)//2:]), label=f_label)
-	f_axis.set_title(f_label)
-	f_axis.set_xlabel('$f (Hz)$')
-	f_axis.set_xlim(0, xlim)
-	f_axis.set_ylim(0, abs_xlim)
-
-
 class TransferFunctions(Enum):
     DiracDelta = "dirac_delta"
     Sinc = "sinc"
