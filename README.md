@@ -8,3 +8,11 @@ The objective of this project is to investigate how PCA can be used for tasks su
 
 ## Instructions
 Please visit pca.ipynb for a step-by-step walkthrough on how we used PCA to decode modulated signals.
+
+## Dependencies
+You can install the required libararies on Ubuntu using the following commands:
+```
+$ pip install matplotlib
+$ pip install numpy
+$ pip install scipy
+```
