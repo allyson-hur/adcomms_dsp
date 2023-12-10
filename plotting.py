@@ -1,7 +1,11 @@
 from scipy.fft import fft, fftfreq, fftshift
 import numpy as np
 
-def real_fft_plot(t, x, t_axis, f_axis, dt, t_label='$x(t)$', f_label='$X(f)$', ylim=1.25, xlim=100e3, abs_xlim=100.0):
+# Sampling Parameters
+F_SAMPLE = 1e6  # Hz
+dt = 1 / F_SAMPLE
+
+def real_fft_plot(t, x, t_axis, f_axis, dt, t_label, f_label, ylim=1.25, xlim=100e3, abs_xlim=100.0):
     X = fftshift(fft(x))
     f = fftshift(fftfreq(len(X), dt))
     
