@@ -208,6 +208,12 @@ class PCARunner:
 
     @cached_property
     def y(self):
+        """
+        Computes the output signal by applying the chosen transfer function and adding noise.
+
+        Returns:
+        numpy.ndarray: The output signal.
+        """
         h_of_t = None
         if self.transfer_func == TransferFunctions.DiracDelta:
             h_of_t = np.ones(np.shape(self.t)[0])
