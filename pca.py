@@ -15,7 +15,6 @@ def batched(iterable, n):
     - iterable: The input iterable to be batched.
     - n (int): The desired batch size.
     """
-    # batched('ABCDEFG', 3) --> ABC DEF G
     it = iter(iterable)
     while True:
         batch = list(islice(it, n))
